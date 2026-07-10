@@ -119,7 +119,7 @@ def update_history(
 
 # ─── Excel 输出 ───
 
-def save_to_excel(products: list[dict], file_path: Path) -> str:
+def save_to_excel(products: list[dict], file_path: Path, category_summary: list[dict] | None = None) -> str:
     """
     将商品列表保存为 Excel 文件
 
@@ -164,6 +164,28 @@ def save_to_excel(products: list[dict], file_path: Path) -> str:
     ws.column_dimensions["C"].width = 14
     ws.column_dimensions["D"].width = 12
     ws.column_dimensions["E"].width = 20
+
+    # ─── 品类排行 Sheet（如果有数据） ───
+    if category_summary:
+        ws2 = wb.create_sheet(title="品类排行", index=0)  # 插到最前面
+
+        # 表头
+        headers2 = ["排名", "品类", "商品数量"]
+        for col, header in enumerate(headers2, 1):
+            cell = ws2.cell(row=1, column=col, value=header)
+            cell.font = header_font_white
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        # 数据行
+        for row, item in enumerate(category_summary, 2):
+            ws2.cell(row=row, column=1, value=row - 1)  # 排名
+            ws2.cell(row=row, column=2, value=item["category"])
+            ws2.cell(row=row, column=3, value=item["count"])
+
+        ws2.column_dimensions["A"].width = 8
+        ws2.column_dimensions["B"].width = 22
+        ws2.column_dimensions["C"].width = 12
 
     # 保存
     wb.save(file_path)

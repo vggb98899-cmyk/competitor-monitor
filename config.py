@@ -13,6 +13,7 @@ KEYWORDS = ["yoga mat", "dumbbell", "resistance band"]
 
 # ─── 数据接口（Shopify 公开 JSON）───
 PRODUCTS_API = f"{BASE_URL}/collections/all/products.json"
+PRODUCTS_API_FULL = f"{BASE_URL}/collections/all/products.json?limit=250"
 
 # ─── 项目根目录 ───
 BASE_DIR = Path(__file__).parent  # 当前文件所在目录
