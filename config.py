@@ -27,6 +27,11 @@ HISTORY_LOOKBACK_DAYS = 1
 OUTPUT_DIR = BASE_DIR / "output"
 OUTPUT_FILE = OUTPUT_DIR / "manduka_products.xlsx"
 
+# ─── 钉钉推送 ───
+DINGTALK_WEBHOOK = "https://oapi.dingtalk.com/robot/send?access_token=ecba594667e4f143c2457c8e742d1076b2211454de3f8acbd8cb4129d214aeb2"
+# 文件服务器端口
+FILE_SERVER_PORT = 8765
+
 # ─── 请求头（伪装成普通浏览器） ───
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
