@@ -1,28 +1,47 @@
 """
 入口文件：编排整个流程，不超过50行
 """
-from config import SEARCH_KEYWORD, OUTPUT_FILE
-from crawler import fetch_all_products, filter_by_keyword, extract_fields
-from utils import save_to_excel, logger
+from datetime import date, timedelta
+from config import KEYWORDS, OUTPUT_FILE, PRICE_HISTORY_FILE, HISTORY_LOOKBACK_DAYS
+from crawler import fetch_all_products, filter_by_keywords
+from utils import (
+    save_to_excel,
+    load_price_history,
+    save_price_history,
+    attach_price_changes,
+    update_history,
+    logger,
+)
 
 
 def main():
-    """主流程：拉取数据 → 过滤 → 提取字段 → 存 Excel"""
+    """主流程：拉取数据 → 多关键词过滤 → 价格对比 → 存 Excel"""
     logger.info("========== Manduka 商品采集开始 ==========")
+    logger.info(f"搜索关键词: {', '.join(KEYWORDS)}")
+
+    today_str = date.today().isoformat()
+    yesterday_str = (date.today() - timedelta(days=HISTORY_LOOKBACK_DAYS)).isoformat()
 
     # 1. 拉取所有商品
     raw_products = fetch_all_products()
 
-    # 2. 按关键词过滤
-    matched = filter_by_keyword(raw_products, SEARCH_KEYWORD)
+    # 2. 多关键词过滤 + 品类标记 + 提取字段
+    products = filter_by_keywords(raw_products)
 
-    # 3. 提取需要的字段
-    products = extract_fields(matched)
+    # 3. 读取价格历史
+    history = load_price_history(PRICE_HISTORY_FILE)
 
-    # 4. 保存到 Excel
+    # 4. 计算价格变化
+    products = attach_price_changes(products, history, today_str, yesterday_str)
+
+    # 5. 保存今天的价格到历史
+    history = update_history(history, products, today_str)
+    save_price_history(PRICE_HISTORY_FILE, history)
+
+    # 6. 保存到 Excel
     file_path = save_to_excel(products, OUTPUT_FILE)
 
-    logger.info(f"✅ 完成！共采集 {len(products)} 条商品")
+    logger.info(f"✅ 完成！共采集 {len(products)} 条商品，覆盖 {len(KEYWORDS)} 个关键词")
     logger.info(f"📁 Excel 文件: {file_path}")
     logger.info("========== Manduka 商品采集结束 ==========")
 

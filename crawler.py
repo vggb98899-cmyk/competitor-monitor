@@ -2,7 +2,7 @@
 爬虫模块：从 Shopify JSON 接口获取商品数据
 """
 import requests
-from config import PRODUCTS_API, HEADERS, TIMEOUT, SEARCH_KEYWORD
+from config import PRODUCTS_API, HEADERS, TIMEOUT, KEYWORDS
 from utils import logger
 
 
@@ -26,49 +26,44 @@ def fetch_all_products() -> list[dict]:
     return products
 
 
-def filter_by_keyword(products: list[dict], keyword: str) -> list[dict]:
+def filter_by_keywords(products: list[dict]) -> list[dict]:
     """
-    按关键词过滤商品（标题中是否包含关键词，不区分大小写）
-
-    Args:
-        products: 原始商品列表
-        keyword: 搜索关键词
+    按多个关键词过滤，每个商品标记所属品类，自动去重
 
     Returns:
-        过滤后的商品列表
+        带品类标记的精简列表，每项含 title / price / sales / category
     """
-    keyword_lower = keyword.lower()
-    matched = []
-    for p in products:
-        title = p.get("title", "")
-        if keyword_lower in title.lower():
-            matched.append(p)
-    logger.info(f"关键词 '{keyword}' 匹配到 {len(matched)} 个商品")
-    return matched
+    seen_handles = set()
+    all_results = []
 
+    for keyword in KEYWORDS:
+        keyword_lower = keyword.lower()
+        matched_count = 0
 
-def extract_fields(products: list[dict]) -> list[dict]:
-    """
-    从原始商品数据中提取需要的字段
+        for p in products:
+            handle = p.get("handle", "")
+            title = p.get("title", "")
 
-    Args:
-        products: 原始商品列表
+            # 跳过已匹配的商品（去重）
+            if handle in seen_handles:
+                continue
 
-    Returns:
-        精简后的列表，每项含 title / price / sales
-    """
-    results = []
-    for p in products:
-        # 取第一个变体的价格作为商品价格
-        variants = p.get("variants", [])
-        price = variants[0].get("price", "") if variants else ""
+            # 标题包含关键词则匹配
+            if keyword_lower in title.lower():
+                # 提取价格
+                variants = p.get("variants", [])
+                price = variants[0].get("price", "") if variants else ""
 
-        results.append({
-            "title": p.get("title", ""),
-            "price": price,
-            # Shopify 原生数据不含月销量，留空
-            "sales": "",
-        })
+                all_results.append({
+                    "title": title,
+                    "price": price,
+                    "sales": "",
+                    "category": keyword,
+                })
+                seen_handles.add(handle)
+                matched_count += 1
 
-    logger.info(f"提取了 {len(results)} 条商品数据")
-    return results
+        logger.info(f"关键词 '{keyword}' → 匹配 {matched_count} 个商品")
+
+    logger.info(f"共计 {len(all_results)} 条商品（已去重）")
+    return all_results
