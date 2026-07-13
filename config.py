@@ -9,7 +9,7 @@ from datetime import date, timedelta
 BASE_URL = "https://www.manduka.com"
 
 # ─── 搜索关键词（可扩展） ───
-KEYWORDS = ["yoga mat", "dumbbell", "resistance band"]
+KEYWORDS = ["yoga", "dumbbell", "resistance band"]
 
 # ─── 数据接口（Shopify 公开 JSON）───
 PRODUCTS_API = f"{BASE_URL}/collections/all/products.json"
@@ -23,9 +23,21 @@ PRICE_HISTORY_FILE = BASE_DIR / "price_history.json"
 # 跟几天前的价格比（1 = 跟昨天比）
 HISTORY_LOOKBACK_DAYS = 1
 
+# ─── 评分历史 ───
+RATING_HISTORY_FILE = BASE_DIR / "rating_history.json"
+
+# ─── 新品发现跟踪 ───
+DISCOVERY_HISTORY_FILE = BASE_DIR / "discovery_history.json"
+
 # ─── 输出路径 ───
 OUTPUT_DIR = BASE_DIR / "output"
-OUTPUT_FILE = OUTPUT_DIR / "manduka_products.xlsx"
+OUTPUT_FILE = OUTPUT_DIR / "竞品分析日报.xlsx"
+
+# ─── 评分采集配置 ───
+# 每家店铺最多爬取评分的商品数（前N个）
+MAX_RATING_PRODUCTS = 20
+# 爬评分时，每个商品间隔（秒）
+RATING_INTERVAL = 1
 
 # ─── 钉钉推送 ───
 DINGTALK_WEBHOOK = "https://oapi.dingtalk.com/robot/send?access_token=ecba594667e4f143c2457c8e742d1076b2211454de3f8acbd8cb4129d214aeb2"
