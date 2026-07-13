@@ -35,7 +35,7 @@ OUTPUT_FILE = OUTPUT_DIR / "竞品分析日报.xlsx"
 
 # ─── 评分采集配置 ───
 # 每家店铺最多爬取评分的商品数（前N个）
-MAX_RATING_PRODUCTS = 20
+MAX_RATING_PRODUCTS = 10
 # 爬评分时，每个商品间隔（秒）
 RATING_INTERVAL = 1
 
