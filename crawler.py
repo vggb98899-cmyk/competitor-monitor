@@ -2,7 +2,7 @@
 爬虫模块：从 Shopify JSON 接口获取商品 + 从页面提取评分
 """
 import re
-import requests
+from curl_cffi import requests
 from utils import logger
 
 HEADERS = {

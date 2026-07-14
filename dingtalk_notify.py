@@ -42,7 +42,7 @@ def send_dingtalk_notify(product_count: int, keyword_count: int) -> bool:
         是否发送成功
     """
     ip = get_local_ip()
-    file_name = "manduka_products.xlsx"
+    file_name = "竞品分析日报.xlsx"
     download_url = f"http://{ip}:{FILE_SERVER_PORT}/{file_name}"
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -57,13 +57,13 @@ def send_dingtalk_notify(product_count: int, keyword_count: int) -> bool:
     message = {
         "msgtype": "actionCard",
         "actionCard": {
-            "title": "Manduka 商品数据日报 —— 推送",
+            "title": "竞品数据日报 —— 推送",
             "text": (
-                f"### Manduka 商品数据日报 —— 推送\n\n"
+                f"### 竞品数据日报 —— 推送\n\n"
                 f"⏰ **采集时间：** {now_str}\n"
                 f"✅ **采集状态：** 完成\n"
                 f"📊 **商品数量：** {product_count} 条\n"
-                f"🔑 **搜索关键词：** {keyword_count} 个\n"
+                f"🏪 **监控店铺：** {keyword_count} 家\n"
                 f"{file_info}\n\n"
                 f"📥 点击下方按钮下载 Excel 报表"
             ),

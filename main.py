@@ -10,6 +10,7 @@ from config import (
     MAX_RATING_PRODUCTS, RATING_INTERVAL,
 )
 from crawler import fetch_store_products, extract_products, fetch_rating, count_by_category
+from database import init_database, save_store_data
 from utils import (
     logger,
     load_price_history, save_price_history,
@@ -28,6 +29,9 @@ def main():
     logger.info(f"  竞品数据采集  {today_str}")
     logger.info(f"  目标: {', '.join(s['name'] for s in STORES)}")
     logger.info("=" * 60)
+
+    # ─── 初始化数据库 ───
+    init_database()
 
     # ─── 读取历史数据 ───
     price_history = load_price_history(PRICE_HISTORY_FILE)
@@ -110,7 +114,10 @@ def main():
         store_price_history[today_str] = today_prices
         price_history[name] = store_price_history
 
-        # 6. 新品发现
+        # 6. 存 MySQL
+        save_store_data(name, products, date.today())
+
+        # 7. 新品发现
         discovery_history = update_discovery(discovery_history, products, name, today_str)
 
         # 7. 汇总
