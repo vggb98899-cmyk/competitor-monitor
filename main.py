@@ -12,6 +12,7 @@ from config import (
 from crawler import fetch_store_products, extract_products, fetch_rating, count_by_category
 from database import init_database, save_store_data
 from ebay_crawler import crawl_ebay
+from alert import check_alerts
 from utils import (
     logger,
     load_price_history, save_price_history,
@@ -135,6 +136,9 @@ def main():
     )
 
     send_dingtalk_notify(product_count=total_count, keyword_count=len(STORES))
+
+    # ─── 告警检查 ───
+    check_alerts(all_products, today_str)
 
     in_sale = sum(1 for p in all_products if p.get("status") == "在售")
     sold_out = sum(1 for p in all_products if p.get("status") == "售罄")
