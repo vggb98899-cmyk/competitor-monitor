@@ -91,16 +91,23 @@ def check_alerts(today_products: list[dict], today_str: str):
 
 
 def _push_alerts(alerts: list):
-    """推送到飞书"""
-    import requests
+    """推送到飞书（重试3次）"""
+    import requests, time
 
     lines = "\n".join(f"- {a}" for a in alerts)
     text = f"【竞品告警】\n\n{lines}\n\n{date.today()} 自动监测"
     message = {"msg_type": "text", "content": {"text": text}}
 
-    try:
-        resp = requests.post(FEISHU_WEBHOOK, json=message, timeout=10)
-        if resp.status_code == 200:
-            logger.info("✅ 告警推送成功")
-    except Exception as e:
-        logger.error(f"❌ 告警推送失败: {e}")
+    for i in range(3):
+        try:
+            resp = requests.post(FEISHU_WEBHOOK, json=message, timeout=10)
+            if resp.status_code == 200:
+                logger.info("✅ 告警推送成功")
+                return
+            else:
+                logger.warning(f"⚠️ 告警推送失败(第{i+1}次)")
+        except Exception as e:
+            logger.warning(f"⚠️ 告警推送异常(第{i+1}次): {e}")
+        if i < 2:
+            time.sleep(2)
+    logger.error("❌ 告警推送失败（重试3次均失败）")
