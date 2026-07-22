@@ -70,29 +70,69 @@ def generate_weekly_report():
                     if changes:
                         price_data[store] = changes[:5]
 
-    # 组装提示词
-    prompt = f"""你是跨境电商运营分析师。根据过去7天的竞品监控数据，生成一份中文周报。
+    # 计算各店铺的品类占比
+    cat_by_store = {}
+    for c in categories:
+        s = c["store"]
+        if s not in cat_by_store:
+            cat_by_store[s] = {"total": 0, "cats": []}
+        cat_by_store[s]["total"] += c["cnt"]
+        cat_by_store[s]["cats"].append((c["category"], c["cnt"]))
 
-要求：
-1. 自然语言，不要表格
-2. 分4段：（1）价格变动最明显的品牌 （2）上新最多的品牌 （3）品类扩展趋势 （4）下周重点关注
-3. 附一句eBay店铺状态说明
-4. 如果某品牌没有数据就写"本周无明显变化"
+    cat_summary = []
+    for s, info in cat_by_store.items():
+        parts = []
+        for cat, cnt in info["cats"][:6]:
+            pct = cnt / info["total"] * 100
+            parts.append(f"{cat}({pct:.0f}%)")
+        # 标记未分类问题
+        uncat_pct = sum(cnt for cat, cnt in info["cats"] if cat == "未分类") / info["total"] * 100 if any(cat == "未分类" for cat, _ in info["cats"]) else 0
+        flag = " ⚠️未分类占比高，属采集缺陷" if uncat_pct > 20 else ""
+        cat_summary.append(f"- {s}: " + ", ".join(parts) + flag)
+
+    # 组装提示词
+    prompt = f"""你是跨境电商运营分析师。根据过去7天的竞品监控数据，生成一份高质量中文周报。
+
+【输出要求】
+- 自然语言，不要表格
+- 每句话必须有具体数字支撑
+- 分4段，每段必须给明确结论：
+
+第1段「价格变动」：
+  - 列出变动幅度最大的品牌+品类+具体百分比（如"XX品牌帐篷均价下降8%"）
+  - 如果无变动直接写"本周各品牌价格体系稳定，无超5%的调价动作"
+
+第2段「上新分析」：
+  - 按品牌分开说，新品最多的品牌排前面
+  - 每个品牌要写：新增X个SKU，其中Y%集中在XX品类
+  - 判断：这是正常补货还是战略性扩品
+
+第3段「品类趋势」：
+  - 指出品类占比有明显变化的品牌
+  - 对于"未分类"占比高的品牌，判断是采集缺陷还是真实业务信号
+  - 采集缺陷的判断标准：未分类>20%且该品牌大部分商品是已知品类→属采集问题
+
+第4段「下周关注」：
+  - 只推荐1-2个品牌，说清楚为什么
+  - 必须附带操作建议
+
+eBay部分：只在出现价格异常时报详情，无异常则只写一句"eBay店铺正常，无异常"
 
 === 过去7天数据 ===
 
-各店铺商品数：{', '.join(f"{s['store']}({s['total']}个)" for s in store_stats)}
+各店铺商品总数：
+{chr(10).join(f"- {s['store']}: {s['total']}个" for s in store_stats)}
 
-本周新品（{len(new_products)}个）：
-{chr(10).join(f"- {p['store']}: {p['title'][:50]}({p['category']})" for p in new_products[:20]) if new_products else "无"}
+本周新品（共{len(new_products)}个）：
+{chr(10).join(f"- {p['store']}: {p['title'][:40]}({p['category']})" for p in new_products[:25]) if new_products else "无"}
 
-品类分布：
-{chr(10).join(f"- {c['store']}: {c['category']}({c['cnt']}个)" for c in categories[:25])}
+品类分布（占比）：
+{chr(10).join(cat_summary)}
 
-价格变动：
-{chr(10).join(f"- {s}: " + "; ".join(v[:3]) for s, v in price_data.items()) if price_data else "本周无明显价格变动"}
+价格变动记录：
+{chr(10).join(f"- {s}: " + "; ".join(v[:3]) for s, v in price_data.items()) if price_data else "本周无显著价格变动"}
 
-eBay店铺状态：outdoor-gear-dude 正常采集，52个商品，仅有标题和标价数据。
+eBay店铺：户外装备店52个商品正常采集，仅有标价数据。
 """
 
     # 调DeepSeek

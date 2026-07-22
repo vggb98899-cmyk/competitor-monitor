@@ -553,3 +553,7 @@
 10:28:39 [ERROR] DeepSeek 异常: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
 10:28:40 [INFO] ✅ 周报推送成功
 10:28:40 [INFO] ✅ 周报完成
+10:33:03 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
+10:33:03 [INFO] 📊 生成周报...
+10:33:12 [INFO] ✅ 周报推送成功
+10:33:12 [INFO] ✅ 周报完成
