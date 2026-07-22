@@ -42,24 +42,33 @@ def generate_weekly_report():
     # ④ 价格变动（从JSON文件读）
     price_data = {}
     if PRICE_HISTORY_FILE.exists():
-        with open(PRICE_HISTORY_FILE, "r") as f:
+        with open(PRICE_HISTORY_FILE, "r", encoding="utf-8") as f:
             ph = json.load(f)
-        for store, days in ph.items():
-            dates = sorted(days.keys())
+
+        # 处理两种格式
+        first_key = next(iter(ph), "")
+        if first_key and first_key[0].isdigit():  # 旧格式：{日期: {标题: 价格}}
+            flat_ph = {"默认": ph}
+        else:  # 新格式：{店铺: {日期: {标题: 价格}}}
+            flat_ph = ph
+
+        for store, days in flat_ph.items():
+            dates = sorted(d for d in days if d[0].isdigit())
             if len(dates) >= 2:
-                old_date = dates[-2] if dates[-2] >= week_ago.isoformat() else dates[0]
+                old_date = dates[-2]
                 new_date = dates[-1]
                 old_prices = days[old_date]
                 new_prices = days[new_date]
-                changes = []
-                for title, new_price in new_prices.items():
-                    if title in old_prices and old_prices[title] != new_price:
-                        try:
-                            changes.append(f"{title[:40]}: ${old_prices[title]}→${new_price}")
-                        except:
-                            pass
-                if changes:
-                    price_data[store] = changes[:5]
+                if isinstance(new_prices, dict):
+                    changes = []
+                    for title, new_price in new_prices.items():
+                        if title in old_prices and old_prices[title] != new_price:
+                            try:
+                                changes.append(f"{title[:30]}: ${str(old_prices[title])}→${str(new_price)}")
+                            except:
+                                pass
+                    if changes:
+                        price_data[store] = changes[:5]
 
     # 组装提示词
     prompt = f"""你是跨境电商运营分析师。根据过去7天的竞品监控数据，生成一份中文周报。
@@ -105,6 +114,7 @@ eBay店铺状态：outdoor-gear-dude 正常采集，52个商品，仅有标题�
         resp = requests.post(
             "https://api.deepseek.com/v1/chat/completions",
             headers=headers, json=payload, timeout=60,
+            proxies={"http": None, "https": None},  # 不走VPN
         )
         if resp.status_code == 200:
             report = resp.json()["choices"][0]["message"]["content"]
@@ -121,7 +131,7 @@ eBay店铺状态：outdoor-gear-dude 正常采集，52个商品，仅有标题�
         try:
             r = requests.post(FEISHU_WEBHOOK, json={
                 "msg_type": "text", "content": {"text": text},
-            }, timeout=15)
+            }, timeout=15, proxies={"http": None, "https": None})
             if r.status_code == 200:
                 logger.info("✅ 周报推送成功")
                 break

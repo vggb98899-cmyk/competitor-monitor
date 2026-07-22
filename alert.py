@@ -110,7 +110,7 @@ def _push_alerts(alerts: list):
 
     for i in range(3):
         try:
-            resp = requests.post(FEISHU_WEBHOOK, json=message, timeout=10)
+            resp = requests.post(FEISHU_WEBHOOK, json=message, timeout=10, proxies={"http": None, "https": None})
             if resp.status_code == 200:
                 logger.info("✅ 告警推送成功")
                 return

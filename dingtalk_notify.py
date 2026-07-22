@@ -37,7 +37,7 @@ def send_dingtalk_notify(product_count: int, keyword_count: int) -> bool:
             resp = requests.post(FEISHU_WEBHOOK, json={
                 "msg_type": "text",
                 "content": {"text": text},
-            }, timeout=15)
+            }, timeout=15, proxies={"http": None, "https": None})
             result = resp.json()
             if resp.status_code == 200:
                 logger.info(f"✅ 日报推送成功")

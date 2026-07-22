@@ -544,3 +544,12 @@
 09:54:11 [INFO]   📁 D:\Reasonix\my_first_project\output\竞品分析日报.xlsx
 10:21:06 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
 10:22:39 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
+10:26:28 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
+10:26:28 [INFO] 📊 生成周报...
+10:27:27 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
+10:27:27 [INFO] 📊 生成周报...
+10:28:29 [INFO] 📝 日志文件: D:\Reasonix\my_first_project\logs\2026-07-22.log
+10:28:29 [INFO] 📊 生成周报...
+10:28:39 [ERROR] DeepSeek 异常: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+10:28:40 [INFO] ✅ 周报推送成功
+10:28:40 [INFO] ✅ 周报完成
