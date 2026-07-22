@@ -22,20 +22,23 @@ def send_dingtalk_notify(product_count: int, keyword_count: int) -> bool:
     download_url = f"http://{ip}:{FILE_SERVER_PORT}/竞品分析日报.xlsx"
 
     text = (
-        f"【竞品分析日报】采集完成\n\n"
-        f"⏰ 时间：{now_str}\n"
-        f"📊 商品：{product_count} 条\n"
-        f"🏪 店铺：{keyword_count} 家\n"
-        f"📥 下载：{download_url}"
+        f"【竞品分析日报】采集完成 | {now_str}\n"
+        f"商品 {product_count} 条 | 店铺 {keyword_count} 家\n"
+        f"下载: {download_url}"
     )
 
     try:
         resp = requests.post(FEISHU_WEBHOOK, json={
             "msg_type": "text",
             "content": {"text": text},
-        }, timeout=10)
-        logger.info(f"✅ 通知发送成功")
-        return True
+        }, timeout=15)
+        result = resp.json()
+        if resp.status_code == 200:
+            logger.info(f"✅ 日报推送成功")
+            return True
+        else:
+            logger.error(f"❌ 日报推送失败: {result}")
+            return False
     except Exception as e:
-        logger.error(f"❌ 通知发送失败: {e}")
+        logger.error(f"❌ 日报推送异常: {e}")
         return False
