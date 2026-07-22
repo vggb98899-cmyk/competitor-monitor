@@ -8,13 +8,22 @@ from datetime import date, timedelta
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 
-# ─── 日志设置 ───
+# ─── 日志设置（同时输出到控制台+文件） ───
+LOG_DIR = Path(__file__).parent / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+log_file = LOG_DIR / f"{date.today().isoformat()}.log"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
+    handlers=[
+        logging.StreamHandler(),  # 控制台
+        logging.FileHandler(log_file, encoding="utf-8"),  # 文件
+    ],
 )
 logger = logging.getLogger(__name__)
+logger.info(f"📝 日志文件: {log_file}")
 
 
 # ─── 价格历史读写 ───

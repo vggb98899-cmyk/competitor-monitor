@@ -10,7 +10,7 @@ from config import (
     MAX_RATING_PRODUCTS, RATING_INTERVAL,
 )
 from crawler import fetch_store_products, extract_products, fetch_rating, count_by_category
-from database import init_database, save_store_data
+from database import init_database, save_store_data, save_run_log
 from ebay_crawler import crawl_ebay
 from alert import check_alerts
 from utils import (
@@ -43,6 +43,8 @@ def main():
     all_products = []
     price_changes = {}
     total_count = 0
+    stores_ok = 0
+    stores_fail = 0
 
     for store in STORES:
         name = store["name"]
@@ -55,9 +57,11 @@ def main():
             raw_products = fetch_store_products(url)
         except Exception as e:
             logger.error(f"  ❌ {name} 拉取失败: {e}")
+            stores_fail += 1
             continue
 
         if not raw_products:
+            stores_fail += 1
             continue
 
         products = extract_products(raw_products, name)
@@ -112,6 +116,7 @@ def main():
         # 新品发现
         discovery_history = update_discovery(discovery_history, products, name, today_str)
 
+        stores_ok += 1
         all_products.extend(products)
         total_count += len(products)
         logger.info(f"  ✅ {name} 完成")
@@ -139,6 +144,15 @@ def main():
 
     # ─── 告警检查 ───
     check_alerts(all_products, today_str)
+
+    # ─── 记录运行日志到MySQL ───
+    save_run_log(
+        run_date=date.today(),
+        stores_ok=stores_ok,
+        stores_fail=stores_fail,
+        total_products=total_count,
+        alerts_count=len([p for p in all_products if p.get("price")]),
+    )
 
     in_sale = sum(1 for p in all_products if p.get("status") == "在售")
     sold_out = sum(1 for p in all_products if p.get("status") == "售罄")

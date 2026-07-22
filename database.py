@@ -68,10 +68,23 @@ def init_database():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS run_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            run_date DATE NOT NULL,
+            stores_ok INT DEFAULT 0,
+            stores_fail INT DEFAULT 0,
+            total_products INT DEFAULT 0,
+            alerts_count INT DEFAULT 0,
+            errors TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """)
+
     conn.commit()
     cursor.close()
     conn.close()
-    logger.info("✅ 数据库初始化完成（products + snapshots）")
+    logger.info("✅ 数据库初始化完成（products + snapshots + run_logs）")
 
 
 def save_store_data(store_name: str, products: list[dict], capture_date: date):
@@ -160,3 +173,20 @@ def get_product_count() -> dict:
     cursor.close()
     conn.close()
     return result
+
+
+def save_run_log(run_date: date, stores_ok: int, stores_fail: int,
+                  total_products: int, alerts_count: int = 0, errors: str = ""):
+    """记录一次运行日志到MySQL"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO run_logs (run_date, stores_ok, stores_fail, total_products, alerts_count, errors)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (run_date, stores_ok, stores_fail, total_products, alerts_count, errors[:500]))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        logger.error(f"运行日志写入失败: {e}")
