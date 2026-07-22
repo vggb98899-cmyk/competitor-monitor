@@ -145,6 +145,11 @@ def main():
     # ─── 告警检查 ───
     check_alerts(all_products, today_str)
 
+    # ─── 周一自动生成周报 ───
+    if date.today().weekday() == 0:  # 0 = 周一
+        from weekly_report import generate_weekly_report
+        generate_weekly_report()
+
     # ─── 记录运行日志到MySQL ───
     save_run_log(
         run_date=date.today(),

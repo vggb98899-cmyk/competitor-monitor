@@ -41,6 +41,10 @@ RATING_INTERVAL = 1
 
 # ─── 飞书推送 ───
 FEISHU_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/49a763a2-f5e0-4a27-93db-461eec32fed2"
+
+# ─── DeepSeek AI ───
+DEEPSEEK_API_KEY = "sk-ca397e2fb17943c5be8a10143f8bcb61"
+DEEPSEEK_MODEL = "deepseek-chat"
 # 文件服务器端口
 FILE_SERVER_PORT = 8765
 
