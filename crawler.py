@@ -137,6 +137,7 @@ CATEGORY_KEYWORDS = [
     ("Pillow", ["pillow", "枕头"]),
     ("Trekking Pole", ["pole", "stick", "trekking", "登山杖"]),
     ("Bag", ["bag", "dry bag", "防水袋", "收纳"]),
+    ("Portable Power", ["power station", "solar generator", "generator", "power bank", "battery pack", "电源", "充电"]),
     ("Accessories", ["accessory", "strap", "hook", "stake", "peg", "配件"]),
 ]
 
