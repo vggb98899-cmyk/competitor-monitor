@@ -314,16 +314,14 @@ def get_rating_trend(rating_history: dict, store: str, title: str, days: int = 7
     if not product_history:
         return ""
 
-    # 按日期排序，取最近N天
+    # 按日期排序，取最近N天，过滤掉空值
     sorted_dates = sorted(product_history.keys())[-days:]
-    values = [product_history[d] for d in sorted_dates]
+    values = [product_history[d] for d in sorted_dates if product_history.get(d)]
 
-    # 去重尾部连续相同值，只保留变化
-    # 但如果只有1个值也显示
-    if len(values) <= 1:
-        return values[0] if values else ""
-
-    # 显示所有值
+    if not values:
+        return ""
+    if len(values) == 1:
+        return values[0]
     return " → ".join(values)
 
 
