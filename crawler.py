@@ -111,10 +111,13 @@ def fetch_rating(store_url: str, handle: str) -> str:
 
         return ""
 
-    except requests.Timeout:
-        logger.warning(f"  评分请求超时: {page_url[:60]}")
-        return ""
     except Exception as e:
+        err_name = type(e).__name__
+        if 'Timeout' in err_name or 'timeout' in str(e).lower():
+            logger.warning(f"  评分请求超时: {page_url[:60]}")
+        else:
+            logger.warning(f"  评分提取失败: {e}")
+        return ""
         logger.warning(f"  评分提取失败: {e}")
         return ""
 

@@ -39,8 +39,8 @@ MAX_RATING_PRODUCTS = 10
 # 爬评分时，每个商品间隔（秒）
 RATING_INTERVAL = 1
 
-# ─── 钉钉推送 ───
-DINGTALK_WEBHOOK = "https://oapi.dingtalk.com/robot/send?access_token=ecba594667e4f143c2457c8e742d1076b2211454de3f8acbd8cb4129d214aeb2"
+# ─── 飞书推送 ───
+FEISHU_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/49a763a2-f5e0-4a27-93db-461eec32fed2"
 # 文件服务器端口
 FILE_SERVER_PORT = 8765
 

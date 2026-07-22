@@ -2,7 +2,7 @@
 import json
 from datetime import date, timedelta
 from pathlib import Path
-from config import DINGTALK_WEBHOOK, PRICE_HISTORY_FILE, DISCOVERY_HISTORY_FILE, BASE_DIR
+from config import FEISHU_WEBHOOK, PRICE_HISTORY_FILE, DISCOVERY_HISTORY_FILE, BASE_DIR
 from utils import logger
 
 PRICE_THRESHOLD = 5  # 价格变动超过5%触发告警
@@ -87,21 +87,16 @@ def check_alerts(today_products: list[dict], today_str: str):
 
 
 def _push_alerts(alerts: list):
-    """推送到钉钉"""
+    """推送到飞书"""
     import requests
 
     lines = "\n".join(f"- {a}" for a in alerts)
-    message = {
-        "msgtype": "markdown",
-        "markdown": {
-            "title": "🔔 竞品数据告警 —— 推送",
-            "text": f"### 🔔 竞品数据告警\n\n{lines}\n\n---\n⏰ {date.today()} 自动监测",
-        },
-    }
+    text = f"【竞品告警】\n\n{lines}\n\n{date.today()} 自动监测"
+    message = {"msg_type": "text", "content": {"text": text}}
 
     try:
-        resp = requests.post(DINGTALK_WEBHOOK, json=message, timeout=10)
-        if resp.json().get("errcode") == 0:
+        resp = requests.post(FEISHU_WEBHOOK, json=message, timeout=10)
+        if resp.status_code == 200:
             logger.info("✅ 告警推送成功")
     except Exception as e:
         logger.error(f"❌ 告警推送失败: {e}")
