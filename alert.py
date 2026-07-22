@@ -78,12 +78,16 @@ def check_alerts(today_products: list[dict], today_str: str):
                 if old_title not in today_titles:
                     alerts.append(f"🗑️ 商品下架 | {store} | {old_title[:50]}")
 
-    # 推送告警
+    # 推送告警（附正常店铺列表）
+    normal_stores = [s for s in by_store.keys() if s not in [a.split(" | ")[1] for a in alerts if len(a.split(" | ")) > 1]]
+    summary = f"✅ 正常: {', '.join(set(normal_stores))}" if normal_stores else ""
+
     if alerts:
-        _push_alerts(alerts[:10])  # 最多推10条，避免刷屏
-        logger.info(f"🔔 触发 {len(alerts)} 条告警（已推送{min(10, len(alerts))}条）")
+        alert_text = alerts[:10] + ([summary] if summary else [])
+        _push_alerts(alert_text)
+        logger.info(f"🔔 触发 {len(alerts)} 条告警 | {summary}")
     else:
-        logger.info(f"✅ 无异常告警")
+        logger.info(f"✅ 无异常告警 | {summary}")
 
 
 def _push_alerts(alerts: list):
