@@ -122,6 +122,37 @@ def fetch_rating(store_url: str, handle: str) -> str:
         return ""
 
 
+# 品类映射：当商品product_type为空时，根据标题关键词判断
+CATEGORY_KEYWORDS = [
+    ("Tent", ["tent", "shelter", "tarp", "canopy", "awning", "帐篷"]),
+    ("Sleeping Bag", ["sleeping bag", "睡袋"]),
+    ("Sleeping Pad", ["sleeping pad", "sleep pad", "mattress", "camp bed", "cot"]),
+    ("Backpack", ["backpack", "pack", "rucksack", "背包"]),
+    ("Chair", ["chair", "stool", "seat", "椅子"]),
+    ("Table", ["table", "desk", "桌子"]),
+    ("Cookware", ["pot", "pan", "cookware", "stove", "burner", "kettle", "mess kit", "餐具", "锅"]),
+    ("Water Bottle", ["water bottle", "bottle", "hydration", "水壶", "水杯"]),
+    ("Lighting", ["light", "lamp", "lantern", "headlamp", "灯"]),
+    ("Apparel", ["jacket", "pants", "shirt", "hoodie", "gloves", "hat", "socks", "衣服", "服装"]),
+    ("Pillow", ["pillow", "枕头"]),
+    ("Trekking Pole", ["pole", "stick", "trekking", "登山杖"]),
+    ("Bag", ["bag", "dry bag", "防水袋", "收纳"]),
+    ("Accessories", ["accessory", "strap", "hook", "stake", "peg", "配件"]),
+]
+
+
+def map_category(title: str, product_type: str) -> str:
+    """如果product_type是未分类，用标题关键词匹配品类"""
+    if product_type and product_type != "未分类":
+        return product_type
+    title_lower = title.lower()
+    for cat, keywords in CATEGORY_KEYWORDS:
+        for kw in keywords:
+            if kw in title_lower:
+                return cat
+    return "未分类"
+
+
 def extract_products(products: list[dict], store_name: str) -> list[dict]:
     """
     从原始商品数据中提取需要的字段
@@ -138,12 +169,13 @@ def extract_products(products: list[dict], store_name: str) -> list[dict]:
         variants = p.get("variants", [])
         price = variants[0].get("price", "") if variants else ""
         status = check_status(variants)
-        product_type = p.get("product_type", "未分类") or "未分类"
+        raw_type = p.get("product_type", "未分类") or "未分类"
+        category = map_category(p.get("title", ""), raw_type)
 
         results.append({
             "title": p.get("title", ""),
             "price": price,
-            "category": product_type,
+            "category": category,
             "status": status,
             "store": store_name,
             "handle": p.get("handle", ""),

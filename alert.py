@@ -42,6 +42,9 @@ def check_alerts(today_products: list[dict], today_str: str):
         by_store[p.get("store", "未知")].append(p)
 
     for store, products in by_store.items():
+        # 跳过eBay（只在周报看，不推告警）
+        if store.startswith("eBay-"):
+            continue
         # 获取该店铺的历史
         store_history = price_history.get(store, {})
         yesterday_prices = store_history.get(yesterday_str, {})
@@ -61,7 +64,7 @@ def check_alerts(today_products: list[dict], today_str: str):
                         if change_pct >= PRICE_THRESHOLD:
                             direction = "📈 涨价" if new > old else "📉 降价"
                             alerts.append(
-                                f"{direction} | {store} | {title[:40]} | "
+                                f"{direction} | {store} | {title[:60]} | "
                                 f"${old:.2f} → ${new:.2f} ({change_pct:.0f}%)"
                             )
                 except ValueError:
@@ -70,13 +73,13 @@ def check_alerts(today_products: list[dict], today_str: str):
             # ② 新品上架
             store_discovery = discovery.get(store, {})
             if title in store_discovery and store_discovery[title] == today_str:
-                alerts.append(f"🆕 新品上架 | {store} | {title[:50]} | ${price}")
+                alerts.append(f"🆕 新品上架 | {store} | {title[:80]} | ${price}")
 
         # ③ 商品下架（昨天有，今天没了）
         if yesterday_prices:
             for old_title in yesterday_prices:
                 if old_title not in today_titles:
-                    alerts.append(f"🗑️ 商品下架 | {store} | {old_title[:50]}")
+                    alerts.append(f"🗑️ 商品下架 | {store} | {old_title[:80]}")
 
     # 推送告警（附正常店铺列表）
     normal_stores = [s for s in by_store.keys() if s not in [a.split(" | ")[1] for a in alerts if len(a.split(" | ")) > 1]]
