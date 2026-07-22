@@ -3,6 +3,7 @@ import json
 from datetime import date, timedelta
 from pathlib import Path
 from config import FEISHU_WEBHOOK, PRICE_HISTORY_FILE, DISCOVERY_HISTORY_FILE, BASE_DIR
+from importance import judge_importance
 from utils import logger
 
 PRICE_THRESHOLD = 5  # 价格变动超过5%触发告警
@@ -73,7 +74,13 @@ def check_alerts(today_products: list[dict], today_str: str):
             # ② 新品上架
             store_discovery = discovery.get(store, {})
             if title in store_discovery and store_discovery[title] == today_str:
-                alerts.append(f"🆕 新品上架 | {store} | {title[:80]} | ${price}")
+                try:
+                    price_val = float(price) if price else 0
+                except:
+                    price_val = 0
+                importance = judge_importance(title, price_val)
+                if importance != "⚪ 普通":
+                    alerts.append(f"🆕 新品上架 | {importance} | {store} | {title[:80]} | ${price}")
 
         # ③ 商品下架（昨天有，今天没了）
         if yesterday_prices:
