@@ -1,2 +1,28 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+
+# 敏感配置（config.py 含 API Key / Webhook 地址）
+config.py
+
+# 数据文件（历史记录、缓存）
+price_history.json
+rating_history.json
+discovery_history.json
+output/*.xlsx
+output/*.json
+*.png
+
+# 日志
+logs/
+
+# 测试脚本（面试官不需要看）
+test_*.py
+test_*.bat
+find_*.py
+install_*.py
+check_db.py
+
+# Streamlit 缓存
+.streamlit/
